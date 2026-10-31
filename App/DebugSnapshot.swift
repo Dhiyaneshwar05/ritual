@@ -27,12 +27,35 @@ enum DebugSnapshot {
                 fallback = w
                 try? await Task.sleep(for: .seconds(1.5))
             }
+            // A roomy window so the day pane shows (RITUAL_SNAPSHOT_SIZE=WxH to change it).
+            let size = (ProcessInfo.processInfo.environment["RITUAL_SNAPSHOT_SIZE"] ?? "1440x900").split(separator: "x").compactMap { Double($0) }
+            if size.count == 2, let w = NSApp.windows.filter({ $0.isVisible && $0.frame.width > 400 }).first {
+                w.setFrame(NSRect(x: 60, y: 60, width: size[0], height: size[1]), display: true)
+                try? await Task.sleep(for: .seconds(1))
+            }
             for skin in skins where !skins.isEmpty {
                 var s = store.settings; s.skin = skin; store.setSettings(s)
+                let home = store.selectedID
                 for tab in tabs {
+                    // The journey looks best on the monument with the most pieces placed.
+                    if tab == .journey { store.selectedID = store.visibleHabits.filter { !$0.isMastered }.max { fill($0) < fill($1) }?.id }
+                    if tab == .stats { store.selectedID = home }
                     NotificationCenter.default.post(name: .ritualShowTab, object: tab)
                     try? await Task.sleep(for: .seconds(1.6))
                     capture(to: dir.appendingPathComponent("\(skin)-\(tab.rawValue.lowercased()).png"))
+                    if tab == .tasks {
+                        for v in [Store.TaskView.inbox, .upcoming] {
+                            store.taskView = v
+                            try? await Task.sleep(for: .seconds(1))
+                            capture(to: dir.appendingPathComponent("\(skin)-tasks-\(v.rawValue.lowercased()).png"))
+                        }
+                        store.taskView = .today
+                    }
+                }
+                let panel = ImageRenderer(content: MenuBarPanel().environment(store).environment(\.skin, store.skin))
+                panel.scale = 2
+                if let img = panel.nsImage, let t = img.tiffRepresentation, let b = NSBitmapImageRep(data: t) {
+                    try? b.representation(using: .png, properties: [:])?.write(to: dir.appendingPathComponent("\(skin)-menubar.png"))
                 }
                 // done state of the orb, then put the data back
                 NotificationCenter.default.post(name: .ritualShowTab, object: Tab.today)
@@ -43,7 +66,7 @@ enum DebugSnapshot {
                 }
             }
             // sheets and the settings window
-            let sheets: [(Notification.Name, String)] = [(.ritualEdit, "sheet-editor"), (.ritualShelf, "sheet-shelf"), (.ritualGuide, "sheet-guide")]
+            let sheets: [(Notification.Name, String)] = [(.ritualEdit, "sheet-editor"), (.ritualShelf, "sheet-shelf"), (.ritualGuide, "sheet-guide"), (.ritualSkins, "sheet-skins")]
             NotificationCenter.default.post(name: .ritualShowTab, object: Tab.today)
             for (name, file) in sheets {
                 NotificationCenter.default.post(name: name, object: nil)
@@ -128,6 +151,10 @@ enum DebugSnapshot {
               let view = sheet.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
         view.cacheDisplay(in: view.bounds, to: rep)
         try? rep.representation(using: .png, properties: [:])?.write(to: url)
+    }
+
+    private static func fill(_ h: Habit) -> Double {
+        Double(Journey.placed(level: h.level, reps: h.journeyReps, length: h.journeyLength))
     }
 
     private static func allSCNViews(in v: NSView) -> [SCNView] {

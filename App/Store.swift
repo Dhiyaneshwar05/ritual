@@ -438,6 +438,7 @@ enum Seed {
             while h.doneKeys.count > 59 { h.log[h.doneKeys.first!] = nil }
             if name == "Journal" { for back in 0..<10 { h.log[Day.key(Day.add(-back, to: today))] = nil } }
             if name == "Drink water" { h.log[Day.key(today)] = 3 }
+            if ["Read", "Walk", "Stretch"].contains(name) { h.log[Day.key(today)] = h.effectiveTarget }
             d.habits.append(h)
         }
         // a finished journey and an archived habit for the trophy shelf
