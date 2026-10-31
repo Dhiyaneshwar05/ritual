@@ -1,0 +1,22 @@
+# Build output (./build.sh recreates it)
+build/
+.build/
+
+# Local-only files that stay on this machine
+.private/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Editors
+*.swp
+.vscode/
+.idea/
+
+# Local notes and secrets
+*.local.md
+.env
