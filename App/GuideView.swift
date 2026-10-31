@@ -11,8 +11,8 @@ struct GuideView: View {
     private enum Art { case orb, journey, monument, week, bar, year, climb, dust, pane, tasks, shelf }
 
     private let cards: [Card] = [
-        Card(eyebrow: "What this is", title: "A habit builder, not a to-do list",
-             body: "Pick something small. Each day you do it, hold the orb. Repeat it enough times and it becomes automatic. That's the whole idea.",
+        Card(eyebrow: "What this is", title: "Small steps that add up",
+             body: "Pick something small and hold the orb on each day you do it. Do it enough times and it becomes automatic. One-off things live in the Tasks tab.",
              art: .orb),
         Card(eyebrow: "Reps, not streaks", title: "Missed days cost nothing",
              body: "A journey is 60 check-ins (you can pick 30 or 90). They don't have to be in a row. Skip a day and you simply pick up where you left off.",

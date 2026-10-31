@@ -3,12 +3,27 @@
 #   ./build.sh            build + install to ~/Applications + launch
 #   ./build.sh --demo     same, but launch with sample history (stored in demo.json)
 #   ./build.sh --no-run   build + install only
+#   ./build.sh --package  build only, leave build/Ritual.app for tools/make-dmg.sh
 set -euo pipefail
 cd "${0:A:h}"
 
-# The default SDK (27.0) is newer than the installed Swift compiler; 26.5 matches it.
-SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk
-[[ -d $SDK ]] || SDK=$(xcrun --show-sdk-path)
+VERSION=0.4.0
+
+# The newest SDK can be ahead of the installed Swift compiler, so use the first one that type-checks
+# a SwiftUI import: RITUAL_SDK if set, then the default, then each installed SDK from newest down.
+pick_sdk() {
+  local probe=$(mktemp -t ritual).swift
+  echo 'import SwiftUI' > $probe
+  for sdk in ${RITUAL_SDK:-} $(xcrun --show-sdk-path 2>/dev/null) $(ls -d /Library/Developer/CommandLineTools/SDKs/MacOSX[0-9]*.*.sdk 2>/dev/null | sort -rV); do
+    [[ -d $sdk ]] || continue
+    if swiftc -sdk $sdk -target arm64-apple-macos15.0 -typecheck $probe >/dev/null 2>&1; then rm -f $probe; echo $sdk; return; fi
+  done
+  rm -f $probe
+  echo "No macOS SDK works with this Swift compiler. Install or update the Command Line Tools: xcode-select --install" >&2
+  exit 1
+}
+SDK=$(pick_sdk)
+echo "→ using $(basename $SDK)"
 TARGET=arm64-apple-macos15.0
 BUILD=build
 APP=$BUILD/Ritual.app
@@ -121,8 +136,12 @@ cat > $BUILD/widgets.entitlements <<'PLIST'
   <array><string>/Library/Application Support/Ritual/</string></array>
 </dict></plist>
 PLIST
+plutil -replace CFBundleShortVersionString -string $VERSION $APP/Contents/Info.plist
+plutil -replace CFBundleShortVersionString -string $VERSION $WX/Contents/Info.plist
 codesign --force --sign $SIGN_ID --timestamp=none --options runtime --entitlements $BUILD/widgets.entitlements $WX
 codesign --force --sign $SIGN_ID --timestamp=none --options runtime $APP
+
+if [[ "${1:-}" == "--package" ]]; then echo "✓ Ritual $VERSION built at $APP"; exit 0; fi
 
 echo "→ installing to $DEST"
 pkill -x Ritual 2>/dev/null && sleep 0.5 || true

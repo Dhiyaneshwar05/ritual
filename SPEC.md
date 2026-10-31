@@ -3,8 +3,8 @@
 Ritual is a habit builder for macOS. It's local-only, has no accounts and no AI, and puts design first.
 
 ## 1. Principles
-- **A habit builder, not a tracker.** Small daily steps. Progress counts *reps*, not consecutive days.
-- **No streaks, no guilt.** Missed days never reset progress; you pick up where you left off.
+- **Reps that add up.** Small daily steps. Progress counts *reps*, not consecutive days.
+- **Missed days cost nothing.** Progress never resets; you pick up where you left off.
 - **60 reps to finish a journey** (30 or 90 can be chosen), because a habit takes roughly two months to become automatic.
 - **One thing per screen.** The orb is the hero.
 - **Physical, toy-like materials:** glass, clay, metal and iridescence, rather than flat UI chrome.
