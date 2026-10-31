@@ -1,0 +1,520 @@
+<title>Ritual Design Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a design board. A real Mac window up top (sidebar of grouped habits + orb stage), then widgets, charts, journey and skin tokens below.
+   Single dark board on purpose: each skin is its own world, the board is the neutral studio wall behind them. */
+:root{
+  color-scheme: dark;
+  --wall:#141416;          /* board background, slight cool bias */
+  --wall-2:#1b1b1e;        /* raised panels */
+  --wall-line:#2a2a2f;
+  --ink:#ececee;
+  --ink-dim:#8d8d96;
+  --pop:#fdb000;           /* board accent = Carbon skin amber */
+  --f-display:"Bricolage Grotesque", "SF Pro Display", system-ui, sans-serif;
+  --f-body:"Hanken Grotesk", "SF Pro Text", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--wall);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(34px,5vw,56px);font-weight:800;line-height:1}
+h2{font-size:26px;font-weight:800}
+.mono{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+.lede{color:var(--ink-dim);max-width:62ch;margin:10px 0 0}
+.sec-head{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.sec-head p{color:var(--ink-dim);margin:0;max-width:65ch}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px}
+.skins{display:flex;flex-wrap:wrap;gap:8px}
+.skin-btn{font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--wall-2);border:1px solid var(--wall-line);border-radius:999px;padding:8px 12px 8px 8px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.skin-btn i{width:16px;height:16px;border-radius:50%;display:block;background:var(--sw)}
+.skin-btn[aria-pressed="true"]{border-color:var(--ink);background:#26262b}
+.skin-btn:focus-visible,button:focus-visible,.habit:focus-visible,.stage:focus-visible{outline:2px solid var(--pop);outline-offset:2px}
+
+/* ====== SKINS (each defines its world) ====== */
+.skin-carbon{--bg:radial-gradient(120% 90% at 50% 0%,#2a2a2b 0%,#1e1e1f 60%,#19191a 100%);--fg:#ededed;--fg-dim:#8a8a8a;--accent:#fdb000;--chip:#050505;--chip-fg:#ededed;--chip-ring:#3a3a3a;
+  --orb:radial-gradient(circle at 50% 30%,#1c1c1d 0%,#0f0f10 55%,#070707 100%);--orb-shadow:0 30px 60px -20px #000,inset 0 2px 1px #ffffff10,inset 0 -18px 40px #000;
+  --rim:none;--check-face:#f5f5f5;--check-side:#9d9d9d;--shard-a:#ffcc06;--shard-b:#ff8b0b;--side-bg:#151516;--side-line:#262628}
+.skin-marigold{--bg:linear-gradient(180deg,#f6bd45 0%,#f1a83c 55%,#e2872d 100%);--fg:#2a1806;--fg-dim:#7a4d16;--accent:#3a2208;--chip:#2a1806;--chip-fg:#f6bd45;--chip-ring:#2a180655;
+  --orb:radial-gradient(circle at 50% 35%,#9a6020 0%,#6a3c10 50%,#3e2207 100%);--orb-shadow:0 30px 60px -24px #6b3a0a,inset 0 0 0 3px #2a1806,inset 0 -20px 40px #2a1806aa,inset 0 14px 30px #ffd28a33;
+  --rim:none;--check-face:#ffffff;--check-side:#d9cbb6;--shard-a:#fff3d6;--shard-b:#6a3c10;--side-bg:#e9a23b;--side-line:#2a180622}
+.skin-paper{--bg:#f7f7f5;--fg:#141414;--fg-dim:#77777a;--accent:#2b4bff;--chip:#141414;--chip-fg:#f7f7f5;--chip-ring:#14141433;
+  --orb:radial-gradient(circle at 50% 30%,#1a1a1c 0%,#060607 70%);--orb-shadow:0 30px 60px -24px #0006;
+  --rim:conic-gradient(from 200deg,#ff3b2f,#ffb300,#2fd0a8,#1d6bff,#0b0b0c 45%,#0b0b0c 70%,#ff3b2f);--check-face:#ffffff;--check-side:#bdbdbd;--shard-a:#2b4bff;--shard-b:#ff3b2f;--side-bg:#efefec;--side-line:#14141414}
+.skin-aurora{--bg:linear-gradient(180deg,#cba8f6 0%,#c3c4fb 50%,#d4f6fb 100%);--fg:#1b1238;--fg-dim:#5b4e86;--accent:#6c4ce0;--chip:#1b1238;--chip-fg:#efe6ff;--chip-ring:#1b123833;
+  --orb:radial-gradient(circle at 50% 40%,#8f86b8cc 0%,#5d5590cc 55%,#3b3468e6 100%);--orb-shadow:0 0 0 2px #ffffff55,0 0 60px #b48cff88,inset 0 0 40px #ffffff33,inset 0 -20px 40px #2a2050aa;
+  --rim:conic-gradient(from 0deg,#ffb3f5,#9ad7ff,#c9b2ff,#ffb3f5);--check-face:#fbe4ff;--check-side:#c79cf0;--shard-a:#ffffff;--shard-b:#a98cff;--side-bg:#c0b0f3;--side-line:#1b123818}
+.skin-coral{--bg:radial-gradient(110% 80% at 50% 10%,#2b1a1f 0%,#170f12 70%);--fg:#f6e9e4;--fg-dim:#a07f86;--accent:#fd6281;--chip:#fd6281;--chip-fg:#170f12;--chip-ring:#fd628155;
+  --orb:radial-gradient(circle at 42% 32%,#ff8aa0 0%,#fd6281 35%,#e4405b 70%,#a82640 100%);--orb-shadow:0 34px 60px -22px #000,inset 0 -16px 30px #8a1c33aa,inset 0 10px 24px #ffd1da55;
+  --rim:none;--check-face:#fff6ef;--check-side:#e8cfc2;--shard-a:#fd6281;--shard-b:#ffd9a8;--side-bg:#120b0d;--side-line:#2a1a1f}
+
+/* ====== MAC WINDOW ====== */
+.win{border-radius:14px;overflow:hidden;border:1px solid #ffffff1a;box-shadow:0 40px 80px -30px #000,0 0 0 .5px #000;display:grid;grid-template-columns:240px minmax(0,1fr);min-height:640px;background:var(--bg);color:var(--fg);transition:color .3s}
+.side{background:var(--side-bg);border-right:1px solid var(--side-line);padding:14px 14px 18px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.lights{display:flex;gap:8px;padding:2px 2px 6px}
+.lights i{width:12px;height:12px;border-radius:50%;background:#ff5f57}.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
+.group{display:flex;flex-direction:column;gap:2px}
+.group-h{display:flex;justify-content:space-between;color:var(--fg-dim);padding:0 8px 6px}
+.habit{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;border:0;background:none;color:inherit;font:inherit;text-align:left;width:100%}
+.habit:hover{background:#ffffff0d}
+.habit[aria-current="true"]{background:color-mix(in srgb,var(--fg) 10%,transparent)}
+.habit .nm{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.habit .rp{font:500 11px var(--f-mono);color:var(--fg-dim);font-variant-numeric:tabular-nums}
+.mini-ring{width:22px;height:22px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--v)*1turn),color-mix(in srgb,var(--fg) 14%,transparent) 0);display:grid;place-items:center}
+.mini-ring::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--side-bg)}
+.mini-ring.done::after{background:var(--accent);box-shadow:inset 0 0 0 3px var(--side-bg)}
+.side-foot{margin-top:auto;color:var(--fg-dim);display:flex;flex-direction:column;gap:6px}
+.kbd{font:500 10px var(--f-mono);border:1px solid var(--side-line);border-radius:5px;padding:2px 5px}
+
+.stage{position:relative;display:grid;grid-template-rows:auto 1fr auto auto;justify-items:center;padding:22px 24px 28px;min-width:0;outline:none}
+.stage-top{width:100%;display:flex;justify-content:space-between;align-items:center}
+.stage-top .mono{color:var(--fg)}
+.icon-btn{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;color:var(--fg);opacity:.85}
+.orb-zone{display:grid;place-items:center;align-self:center;padding:24px 0}
+.caption{font:500 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg-dim);text-align:center;margin-bottom:18px;font-variant-numeric:tabular-nums}
+.caption b{color:var(--fg);font-weight:700}
+canvas.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* ====== ORB ====== */
+.orb{--s:300px;--p:0;width:var(--s);height:var(--s);max-width:100%;border-radius:50%;position:relative;background:var(--orb);box-shadow:var(--orb-shadow);display:grid;place-items:center;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .25s cubic-bezier(.3,1.6,.5,1);animation:float 5s ease-in-out infinite}
+.orb::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--rim);-webkit-mask:radial-gradient(circle,transparent 60%,#000 71%);mask:radial-gradient(circle,transparent 60%,#000 71%);opacity:.95;pointer-events:none}
+.orb::after{content:"";position:absolute;inset:8% 22% 62% 22%;border-radius:50%;background:radial-gradient(closest-side,#ffffff22,transparent);pointer-events:none}
+.orb .ring{position:absolute;inset:-14px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1turn),transparent 0);-webkit-mask:radial-gradient(circle,transparent calc(50% - 4px),#000 calc(50% - 3px));mask:radial-gradient(circle,transparent calc(50% - 4px),#000 calc(50% - 3px));pointer-events:none}
+.orb.holding{transform:scale(.94)}
+.orb.pop{animation:pop .55s cubic-bezier(.2,1.8,.4,1)}
+.orb .label{position:absolute;text-align:center;padding:0 14%;transition:opacity .2s,transform .3s;color:#fff}
+.skin-marigold .orb .label,.skin-coral .orb .label{color:#fff}
+.orb .label h3{font-size:calc(var(--s)*.1);font-weight:800;line-height:1.05}
+.orb .label p{font:500 calc(var(--s)*.038) var(--f-mono);letter-spacing:.1em;opacity:.6;margin:.5em 0 0;text-transform:uppercase}
+.orb svg.check{width:58%;overflow:visible;transform:scale(.3) rotate(-12deg);opacity:0;transition:transform .45s cubic-bezier(.2,1.7,.4,1),opacity .2s;filter:drop-shadow(0 8px 10px #0005)}
+.orb.done svg.check{transform:none;opacity:1}
+.orb.done .label{opacity:0;transform:scale(.85)}
+.skin-aurora .orb svg.check{filter:drop-shadow(0 0 14px #ffc8ff)}
+.wave{position:absolute;inset:0;border-radius:50%;border:3px solid var(--accent);opacity:0;pointer-events:none}
+.orb.pop .wave{animation:wave .7s ease-out}
+@keyframes float{50%{translate:0 -5px}}
+@keyframes pop{30%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes wave{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.6)}}
+
+/* week row */
+.week{display:flex;gap:12px;align-items:flex-start}
+.day{display:flex;flex-direction:column;align-items:center;gap:8px;font:500 10.5px var(--f-mono);letter-spacing:.1em;color:var(--fg)}
+.chip{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:500 11px var(--f-mono);font-variant-numeric:tabular-nums;border:1.5px solid var(--chip-ring);color:var(--fg-dim)}
+.chip.on{background:var(--chip);border-color:var(--chip);color:var(--chip-fg)}
+.day.today::after{content:"";width:26px;height:2px;background:var(--accent);margin-top:-2px}
+
+/* ====== level strip ====== */
+.levels{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:22px}
+.lv-row{display:flex;gap:14px;align-items:center}
+.lv{width:22px;height:22px;color:var(--fg-dim);opacity:.55;display:grid;place-items:center;position:relative}
+.lv.done{opacity:1;color:var(--fg)}
+.lv.cur{opacity:1;color:var(--accent)}
+.lv.cur::after{content:"";position:absolute;bottom:-7px;width:18px;height:2px;background:var(--accent)}
+.bar{width:64px;height:3px;border-radius:2px;background:color-mix(in srgb,var(--fg) 18%,transparent);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--fg)}
+
+/* ====== panels below ====== */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px}
+.panel{background:var(--bg);color:var(--fg);border-radius:18px;padding:20px;border:1px solid #ffffff12;min-width:0;position:relative;overflow:hidden}
+.panel .mono{color:var(--fg-dim)}
+.panel-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:12px}
+.big{font:800 44px/1 var(--f-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+
+/* widgets */
+.desk{border-radius:18px;padding:28px;background:
+  radial-gradient(60% 80% at 15% 20%,#3b4a6b 0%,transparent 60%),radial-gradient(60% 70% at 85% 90%,#5b3a52 0%,transparent 60%),#1c1f2a;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.w{border-radius:22px;background:var(--bg);color:var(--fg);padding:14px;box-shadow:0 16px 40px -18px #000a;overflow:hidden;position:relative}
+.w-s{width:170px;height:170px}
+.w-m{width:364px;max-width:100%;height:170px}
+.w-l{width:364px;max-width:100%;height:364px}
+.w .mono{color:var(--fg-dim);font-size:9.5px}
+.w-orb{display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100%}
+.w-list{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:10px}
+.w-item{display:flex;align-items:center;gap:8px;min-width:0}
+.w-item .orb{--s:34px;animation:none;cursor:default}
+.w-item .orb svg.check{width:62%}
+.w-item div{min-width:0}
+.w-item b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-item span{font:500 9.5px var(--f-mono);color:var(--fg-dim);letter-spacing:.08em}
+.w-tag{font:500 9px var(--f-mono);letter-spacing:.1em;color:#ffffff99;text-transform:uppercase;margin-top:8px;text-align:center}
+
+/* menu bar mock */
+.menubar{width:100%;height:28px;border-radius:8px;background:#ffffff1f;backdrop-filter:blur(10px);display:flex;justify-content:flex-end;align-items:center;gap:16px;padding:0 14px;font:500 12px var(--f-body);color:#fff}
+.mb-item{display:flex;align-items:center;gap:6px;padding:2px 8px;border-radius:5px;background:#ffffff26}
+.pop-menu{width:280px;max-width:100%;border-radius:14px;background:#1e1e22ee;border:1px solid #ffffff1c;padding:12px;color:#ececee;display:flex;flex-direction:column;gap:6px;margin-left:auto}
+.pop-row{display:flex;align-items:center;gap:10px;padding:6px;border-radius:8px}
+.pop-row:hover{background:#ffffff10}
+.pop-row .orb{--s:26px;animation:none}
+.pop-row b{font-size:13px;flex:1}
+.pop-row span{font:500 10px var(--f-mono);color:#8d8d96}
+
+/* year field */
+.yearsvg{width:100%;height:auto;display:block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stat{border-radius:12px;padding:12px;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.stat .big{font-size:30px}
+.stat small{display:block;font:500 10px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:6px}
+.stat em{font-style:normal;color:var(--accent);font:600 12px var(--f-body)}
+
+/* journey */
+.journey{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;align-items:center}
+.journey canvas{width:100%;aspect-ratio:4/3;max-width:100%;display:block}
+.journey p{color:var(--fg-dim);max-width:44ch}
+.level-list{list-style:none;padding:0;margin:16px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.level-list li{display:flex;gap:10px;align-items:baseline;font-size:13.5px}
+.level-list li .mono{min-width:4ch;color:var(--fg-dim)}
+.level-list li.cur{color:var(--accent);font-weight:600}
+
+/* swatches */
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px}
+.sw{border-radius:16px;overflow:hidden;border:1px solid #ffffff14;background:var(--wall-2)}
+.sw-top{height:120px;background:var(--bg);display:grid;place-items:center}
+.sw-top .orb{--s:74px;animation:none;cursor:default}
+.sw-body{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.sw-body h3{font-size:17px}
+.sw-body p{margin:0;color:var(--ink-dim);font-size:13px}
+.dots{display:flex;gap:6px}
+.dots i{width:18px;height:18px;border-radius:50%;border:1px solid #ffffff22}
+.note{color:var(--ink-dim);font-size:13px;margin-top:12px}
+
+@media (max-width:760px){
+  .win{grid-template-columns:1fr}
+  .side{border-right:0;border-bottom:1px solid var(--side-line)}
+  .groups{display:flex;gap:16px;overflow-x:auto}
+  .group{min-width:200px}
+  .side-foot{display:none}
+  .orb{--s:240px}
+  .week{gap:7px}
+  .journey{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}.orb.pop,.orb.pop .wave{animation:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="mono" style="color:var(--pop)">Ritual · macOS · design board v0.1</div>
+      <h1>Hold the orb.<br>Build the habit.</h1>
+      <p class="lede">A working mockup of the main window, widgets, menu bar, charts and journey. Press and hold the orb (or hold Space) to check today off. Switch skins to see each world.</p>
+    </div>
+    <div class="skins" role="group" aria-label="Skin">
+      <button class="skin-btn" data-skin="carbon" aria-pressed="true" style="--sw:radial-gradient(#1e1e1f 40%,#fdb000 42%)"><i></i>Carbon</button>
+      <button class="skin-btn" data-skin="marigold" aria-pressed="false" style="--sw:linear-gradient(#f6bd45,#e2872d)"><i></i>Marigold</button>
+      <button class="skin-btn" data-skin="paper" aria-pressed="false" style="--sw:conic-gradient(#ff3b2f,#ffb300,#2fd0a8,#1d6bff,#ff3b2f)"><i></i>Paper</button>
+      <button class="skin-btn" data-skin="aurora" aria-pressed="false" style="--sw:linear-gradient(#cba8f6,#d4f6fb)"><i></i>Aurora</button>
+      <button class="skin-btn" data-skin="coral" aria-pressed="false" style="--sw:radial-gradient(circle at 40% 35%,#ff8aa0,#e4405b)"><i></i>Coral</button>
+    </div>
+  </header>
+
+  <!-- MAIN WINDOW -->
+  <section class="skinned skin-carbon" aria-label="Main window">
+    <div class="win">
+      <aside class="side">
+        <div class="lights" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="groups" id="groups"></div>
+        <div class="side-foot">
+          <div class="mono">Shortcuts</div>
+          <div style="font-size:12.5px"><span class="kbd">Space</span> hold to check · <span class="kbd">↑↓</span> switch</div>
+          <div style="font-size:12.5px"><span class="kbd">⌥⌘H</span> quick check from anywhere</div>
+        </div>
+      </aside>
+      <div class="stage" id="stage" tabindex="0" aria-label="Today. Press and hold Space to check off the habit">
+        <canvas class="fx" id="fx"></canvas>
+        <div class="stage-top">
+          <span class="icon-btn" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M9 2v14M2 9h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+          <span class="mono" id="stageTitle">Today</span>
+          <span class="icon-btn" aria-hidden="true"><svg width="20" height="18" viewBox="0 0 20 18"><path d="M2 5h16M2 13h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="7" cy="5" r="2.6" fill="currentColor"/><circle cx="13" cy="13" r="2.6" fill="currentColor"/></svg></span>
+        </div>
+        <div class="orb-zone"><div id="mainOrb"></div></div>
+        <div class="caption" id="caption"></div>
+        <div>
+          <div class="week" id="week"></div>
+          <div class="levels" id="levels"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WIDGETS -->
+  <section>
+    <div class="sec-head">
+      <span class="mono" style="color:var(--pop)">WidgetKit · desktop + Notification Center</span>
+      <h2>Widgets and menu bar</h2>
+      <p>The widgets follow the active skin. Orb and Today list are interactive: you can check a habit off straight from the desktop. The menu bar shows today's count, and clicking it opens a quick-check popover.</p>
+    </div>
+    <div class="desk skinned skin-carbon" id="desk"></div>
+  </section>
+
+  <!-- CHARTS -->
+  <section>
+    <div class="sec-head">
+      <span class="mono" style="color:var(--pop)">Stats</span>
+      <h2>The year field and the climb</h2>
+      <p>The year field puts each month in a column and each day on a row. A done day becomes a small shard, and a missed day stays a quiet dot with no red. The climb chart plots all 60 reps as a switchback path up a low-poly mountain, with a flag at each of the 8 levels.</p>
+    </div>
+    <div class="grid2 skinned skin-carbon" id="charts">
+      <div class="panel">
+        <div class="panel-h"><span class="mono" id="yearHabit">Year field</span><span class="big" id="yearNum" style="font-size:28px">2026</span></div>
+        <svg class="yearsvg" id="yearSvg" viewBox="0 0 360 330" role="img" aria-label="Year field of completed days"></svg>
+      </div>
+      <div class="panel">
+        <div class="panel-h"><span class="mono">Climb</span><span class="mono" id="climbLbl"></span></div>
+        <svg class="yearsvg" id="climbSvg" viewBox="0 0 360 210" role="img" aria-label="Climb chart of reps toward 60"></svg>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section>
+    <div class="sec-head">
+      <span class="mono" style="color:var(--pop)">Journey · 60 reps · 8 levels</span>
+      <h2>Every rep places a piece</h2>
+      <p>Each level builds a small low-poly monument, and every check-in adds one block. The real app generates these in code with RealityKit, so no hand-modelled 3D assets are needed. Missed days never remove a piece.</p>
+    </div>
+    <div class="panel skinned skin-carbon" id="journeyPanel">
+      <div class="journey">
+        <canvas id="dio" width="720" height="540" aria-label="Current level monument"></canvas>
+        <div>
+          <div class="mono" id="jLevelNo"></div>
+          <h2 id="jLevelName" style="font-size:34px;margin-top:6px"></h2>
+          <p id="jLevelCopy"></p>
+          <ul class="level-list" id="levelList"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKINS -->
+  <section>
+    <div class="sec-head">
+      <span class="mono" style="color:var(--pop)">Skin tokens</span>
+      <h2>Five worlds to start</h2>
+      <p>A skin swaps the background, the orb material, the check colors, the ink and one accent. Every screen and widget reads from these same tokens.</p>
+    </div>
+    <div class="swatches" id="swatches"></div>
+    <p class="note">The mockup uses Bricolage Grotesque and JetBrains Mono as web stand-ins. The Mac app will use SF Pro Rounded (heavy) for display and SF Mono for the caps labels.</p>
+  </section>
+</div>
+
+<script>
+(()=>{
+const SKINS={
+  carbon:{name:"Carbon",tag:"Matte black stone, amber light",dots:["#1e1e1f","#0f0f10","#f5f5f5","#fdb000"]},
+  marigold:{name:"Marigold",tag:"Warm amber glass",dots:["#f6bd45","#6a3c10","#ffffff","#3a2208"]},
+  paper:{name:"Paper",tag:"White page, oil-slick rim",dots:["#f7f7f5","#060607","#ff3b2f","#2b4bff"]},
+  aurora:{name:"Aurora",tag:"Lavender ice, glowing glass",dots:["#cba8f6","#d4f6fb","#fbe4ff","#6c4ce0"]},
+  coral:{name:"Coral",tag:"Soft clay on dark plum",dots:["#170f12","#fd6281","#fff6ef","#ffd9a8"]},
+};
+const LEVELS=[
+  {n:"Spark",r:3,c:"Starting feels easy. Enjoy that, and keep it small enough to do on a bad day."},
+  {n:"Foothills",r:5,c:"The first friction shows up. Shrink the habit if you need to. Showing up is the rep."},
+  {n:"Fog",r:6,c:"The novelty fades and motivation dips. That is normal. Routines carry you when motivation won't."},
+  {n:"The Long Field",r:7,c:"Nothing dramatic happens here. Boring is fine. Boring is where habits set."},
+  {n:"Storm",r:8,c:"Life gets in the way. Missed days don't cost you any pieces. Pick up where you left off."},
+  {n:"Ridge",r:9,c:"You start to see yourself as someone who does this. Identity is the real prize."},
+  {n:"Ascent",r:10,c:"It takes less effort now. Notice how automatic it has become."},
+  {n:"Peak",r:12,c:"Final stretch. When you place the gem, the habit is yours."},
+];
+const CUM=LEVELS.reduce((a,l)=>{a.push((a.at(-1)||0)+l.r);return a},[]);
+const GLYPH=[
+  '<path d="M11 2l6 9-6 9-6-9z" fill="currentColor"/>',
+  '<path d="M1 19c3-8 6-8 8-4 2-6 6-8 12 4z" fill="currentColor"/>',
+  '<path d="M2 7h18M4 11h14M2 15h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  '<path d="M1 16h20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="5" cy="11" r="1.6" fill="currentColor"/><circle cx="11" cy="9" r="1.6" fill="currentColor"/><circle cx="17" cy="11" r="1.6" fill="currentColor"/>',
+  '<path d="M13 1L5 12h6l-2 9 8-12h-6z" fill="currentColor"/>',
+  '<path d="M1 18l5-8 4 5 4-9 7 12z" fill="currentColor"/>',
+  '<path d="M2 20v-5h5v-5h5V5h5V1" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linejoin="round"/>',
+  '<path d="M2 21l9-14 9 14z" fill="currentColor"/><path d="M11 0l2.5 3.5L11 7 8.5 3.5z" fill="currentColor"/>',
+];
+const DAY=86400000, today=new Date(); today.setHours(0,0,0,0);
+const key=d=>d.toISOString().slice(0,10);
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const HABITS=[
+  {id:"med",name:"Meditate",cap:"10 minutes",group:"Morning",start:62,rate:.72,seed:3},
+  {id:"read",name:"Read",cap:"10 pages",group:"Morning",start:20,rate:.65,seed:7},
+  {id:"walk",name:"Walk",cap:"10,000 steps",group:"Body",start:40,rate:.7,seed:11},
+  {id:"str",name:"Stretch",cap:"5 minutes",group:"Body",start:9,rate:.7,seed:5},
+  {id:"water",name:"Drink water",cap:"8 glasses",group:"Body",start:70,rate:.5,seed:13},
+  {id:"phone",name:"No phone in bed",cap:"after 10:30 pm",group:"Evening",start:75,rate:.82,seed:2},
+  {id:"jrnl",name:"Journal",cap:"3 lines",group:"Evening",start:30,rate:.45,seed:17},
+];
+HABITS.forEach(h=>{const r=rng(h.seed);h.done=new Set();for(let i=h.start;i>=1;i--){if(r()<h.rate)h.done.add(key(new Date(today-i*DAY)))}
+  while(h.done.size>59){h.done.delete([...h.done][0])}});
+let cur=HABITS[0], skin="carbon";
+const reps=h=>Math.min(60,h.done.size);
+const isDoneToday=h=>h.done.has(key(today));
+const levelOf=r=>{let i=CUM.findIndex(c=>r<c);return i<0?7:i};
+
+function checkSVG(){ // extruded isometric check: stack offset copies for the side, face on top
+  const pts="16,50 30,36 42,48 70,20 84,34 42,76";let s='<svg class="check" viewBox="0 0 100 100" aria-hidden="true">';
+  for(let i=10;i>0;i--)s+=`<polygon points="${pts}" transform="translate(${-i*.9} ${i*.9})" style="fill:var(--check-side)"/>`;
+  return s+`<polygon points="${pts}" style="fill:var(--check-face)"/></svg>`}
+function orbHTML(h,size,{label=true,interactive=false}={}){
+  return `<div class="orb ${isDoneToday(h)?'done':''}" style="--s:${size}px" ${interactive?'role="button" aria-label="Hold to check '+h.name+'"':''} data-id="${h.id}">
+    ${interactive?'<div class="ring"></div><div class="wave"></div>':''}
+    ${label?`<div class="label"><h3>${h.name}</h3><p>${h.cap}</p></div>`:''}${checkSVG()}</div>`}
+
+/* ---------- sidebar ---------- */
+function renderSide(){
+  const groups=[...new Set(HABITS.map(h=>h.group))];
+  document.getElementById('groups').innerHTML=groups.map(g=>{
+    const hs=HABITS.filter(h=>h.group===g),d=hs.filter(isDoneToday).length;
+    return `<div class="group"><div class="group-h mono"><span>${g}</span><span>${d}/${hs.length}</span></div>`+
+    hs.map(h=>`<button class="habit" data-id="${h.id}" aria-current="${h===cur}"><span class="mini-ring ${isDoneToday(h)?'done':''}" style="--v:${reps(h)/60}"></span><span class="nm">${h.name}</span><span class="rp">${reps(h)}/60</span></button>`).join('')+'</div>'}).join('');
+}
+document.getElementById('groups').addEventListener('click',e=>{const b=e.target.closest('.habit');if(b){cur=HABITS.find(h=>h.id===b.dataset.id);renderAll()}});
+
+/* ---------- stage ---------- */
+function renderStage(){
+  document.getElementById('stageTitle').textContent=cur.group+' · '+cur.name;
+  document.getElementById('mainOrb').innerHTML=orbHTML(cur,300,{interactive:true});
+  const r=reps(cur),L=levelOf(r);
+  document.getElementById('caption').innerHTML=isDoneToday(cur)?`Done today · <b>Rep ${r}</b> of 60`:`Hold to check · Level ${L+1} · <b>${r}</b> / 60`;
+  let w='';for(let i=6;i>=0;i--){const d=new Date(today-i*DAY),on=cur.done.has(key(d));
+    w+=`<div class="day ${i===0?'today':''}"><div class="chip ${on?'on':''}">${on?'✓':d.getDate()}</div>${i===0?'TODAY':d.toLocaleDateString('en',{weekday:'short'}).toUpperCase()}</div>`}
+  document.getElementById('week').innerHTML=w;
+  const prev=L?CUM[L-1]:0;
+  document.getElementById('levels').innerHTML=`<div class="lv-row">${GLYPH.map((g,i)=>`<span class="lv ${i<L?'done':i===L?'cur':''}" title="${LEVELS[i].n}"><svg width="22" height="22" viewBox="0 0 22 22">${g}</svg></span>`).join('')}</div>
+    <div class="bar" title="${r-prev} of ${LEVELS[L].r} in this level"><i style="width:${Math.min(100,(r-prev)/LEVELS[L].r*100)}%"></i></div>`;
+  bindOrb(document.querySelector('#mainOrb .orb'));
+}
+
+/* ---------- hold to check ---------- */
+let audio;
+function tone(f,t0,dur,type='sine',g=.12){const a=audio,o=a.createOscillator(),v=a.createGain();o.type=type;o.frequency.value=f;v.gain.setValueAtTime(0,a.currentTime+t0);v.gain.linearRampToValueAtTime(g,a.currentTime+t0+.01);v.gain.exponentialRampToValueAtTime(.0001,a.currentTime+t0+dur);o.connect(v).connect(a.destination);o.start(a.currentTime+t0);o.stop(a.currentTime+t0+dur+.05)}
+function sfx(kind){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+  if(kind==='tick')tone(880,0,.05,'triangle',.05);
+  if(kind==='done'){[523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*.055,.5,'triangle',.09));tone(130.8,0,.35,'sine',.18)}
+  if(kind==='undo')tone(330,0,.15,'sine',.08)}catch(e){}}
+let holdRAF=null;
+function bindOrb(orb){
+  let t0=0,lastQ=0;
+  const start=e=>{if(e&&e.button===2)return;if(orb.classList.contains('done')){orb.classList.remove('pop');void orb.offsetWidth;orb.classList.add('pop');return}
+    sfx('tick');orb.classList.add('holding');t0=performance.now();lastQ=0;cancelAnimationFrame(holdRAF);
+    const step=now=>{const p=Math.min(1,(now-t0)/850);orb.style.setProperty('--p',p);const q=Math.floor(p*4);if(q>lastQ&&q<4){lastQ=q;sfx('tick')}
+      if(p>=1){complete(orb);return}holdRAF=requestAnimationFrame(step)};holdRAF=requestAnimationFrame(step)};
+  const stop=()=>{if(!orb.classList.contains('holding'))return;cancelAnimationFrame(holdRAF);orb.classList.remove('holding');
+    const p0=parseFloat(orb.style.getPropertyValue('--p'))||0,ts=performance.now();
+    const back=now=>{const p=Math.max(0,p0-(now-ts)/250);orb.style.setProperty('--p',p);if(p>0)holdRAF=requestAnimationFrame(back)};holdRAF=requestAnimationFrame(back)};
+  orb.addEventListener('pointerdown',e=>{orb.setPointerCapture(e.pointerId);start(e)});
+  orb.addEventListener('pointerup',stop);orb.addEventListener('pointercancel',stop);
+  orb.addEventListener('contextmenu',e=>{e.preventDefault();if(isDoneToday(cur)){cur.done.delete(key(today));sfx('undo');renderAll()}});
+  orb._start=start;orb._stop=stop;
+}
+function complete(orb){
+  orb.classList.remove('holding');orb.style.setProperty('--p',0);
+  const before=levelOf(reps(cur));cur.done.add(key(today));
+  orb.classList.add('done');orb.classList.remove('pop');void orb.offsetWidth;orb.classList.add('pop');sfx('done');burst(orb);
+  setTimeout(()=>{renderAll(true);if(levelOf(reps(cur))>before)setTimeout(()=>sfx('done'),200)},650);
+}
+const stage=document.getElementById('stage');
+let spaceDown=false;
+document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('button'))return;
+  if(e.code==='Space'){e.preventDefault();if(!spaceDown){spaceDown=true;document.querySelector('#mainOrb .orb')._start()}}
+  if(e.code==='ArrowDown'||e.code==='ArrowUp'){if(!stage.contains(document.activeElement)&&document.activeElement!==document.body)return;e.preventDefault();const i=HABITS.indexOf(cur);cur=HABITS[(i+(e.code==='ArrowDown'?1:HABITS.length-1))%HABITS.length];renderAll()}});
+document.addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;const o=document.querySelector('#mainOrb .orb');o&&o._stop()}});
+
+/* ---------- particles: faceted shards ---------- */
+const fx=document.getElementById('fx'),ctx=fx.getContext('2d');let parts=[];
+function burst(orb){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const r=stage.getBoundingClientRect(),o=orb.getBoundingClientRect(),dpr=devicePixelRatio||1;
+  fx.width=r.width*dpr;fx.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  const cs=getComputedStyle(orb),A=cs.getPropertyValue('--shard-a').trim(),B=cs.getPropertyValue('--shard-b').trim();
+  const cx=o.left-r.left+o.width/2,cy=o.top-r.top+o.height/2;
+  for(let i=0;i<46;i++){const a=Math.random()*Math.PI*2,s=4+Math.random()*9;parts.push({x:cx+Math.cos(a)*o.width*.4,y:cy+Math.sin(a)*o.width*.4,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3,r:Math.random()*6,vr:(Math.random()-.5)*.4,sz:5+Math.random()*10,c:Math.random()<.6?A:B,life:1})}
+  if(parts.length===46)requestAnimationFrame(tick)}
+function tick(){ctx.clearRect(0,0,fx.width,fx.height);parts=parts.filter(p=>p.life>0);
+  for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.vx*=.98;p.r+=p.vr;p.life-=.017;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.c;ctx.beginPath();ctx.moveTo(0,-p.sz);ctx.lineTo(p.sz*.55,p.sz*.5);ctx.lineTo(-p.sz*.4,p.sz*.3);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#0004';ctx.beginPath();ctx.moveTo(0,-p.sz);ctx.lineTo(p.sz*.55,p.sz*.5);ctx.lineTo(0,p.sz*.15);ctx.closePath();ctx.fill();ctx.restore()}
+  if(parts.length)requestAnimationFrame(tick);else ctx.clearRect(0,0,fx.width,fx.height)}
+
+/* ---------- widgets + menu bar ---------- */
+function renderDesk(){
+  const r=reps(cur),L=levelOf(r),doneN=HABITS.filter(isDoneToday).length;
+  const list=HABITS.slice(0,4).map(h=>`<div class="w-item">${orbHTML(h,34,{label:false})}<div><b>${h.name}</b><span>${reps(h)}/60</span></div></div>`).join('');
+  const weeks=16;let cells='';for(let c=0;c<weeks;c++)for(let d=0;d<7;d++){const dt=new Date(today-((weeks-1-c)*7+(6-d))*DAY);const on=cur.done.has(key(dt));
+    cells+=`<rect x="${c*21}" y="${d*16}" width="17" height="12" rx="4" style="fill:${on?'var(--accent)':'color-mix(in srgb,var(--fg) 12%,transparent)'}"/>`}
+  document.getElementById('desk').innerHTML=`
+   <div class="menubar" aria-hidden="true"><span>Wi‑Fi</span><span class="mb-item"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.5" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M3.2 6.2l1.8 1.8 3.8-4" stroke="#fff" stroke-width="1.4" fill="none"/></svg>${doneN}/${HABITS.length}</span><span>${today.toLocaleDateString('en',{weekday:'short',day:'numeric',month:'short'})}</span></div>
+   <div class="w w-s"><div class="w-orb"><span class="mono">${cur.name}</span>${orbHTML(cur,92,{label:false})}<span class="mono">Rep ${r} / 60</span></div></div>
+   <div class="w w-m"><span class="mono">Today · ${doneN} of ${HABITS.length} done</span><div class="w-list">${list}</div></div>
+   <div class="w w-m"><div class="panel-h" style="margin-bottom:8px"><span class="mono">${cur.name} · 16 weeks</span><span class="mono">${r} reps</span></div><svg viewBox="0 0 332 108" style="width:100%">${cells}</svg></div>
+   <div class="w w-s" style="display:flex;flex-direction:column;justify-content:space-between"><span class="mono">Level ${L+1} · ${LEVELS[L].n}</span><span class="big">${r}<span style="font-size:18px;opacity:.5">/60</span></span><span class="mono">No streaks. Just reps.</span></div>
+   <div class="pop-menu"><div class="mono" style="color:#8d8d96;padding:0 6px 4px">Quick check · ⌥⌘H</div>${HABITS.slice(0,5).map(h=>`<div class="pop-row skin-${skin}">${orbHTML(h,26,{label:false})}<b>${h.name}</b><span>${reps(h)}/60</span></div>`).join('')}</div>`;
+}
+
+/* ---------- year field ---------- */
+function renderYear(){
+  const y=today.getFullYear();let s='';const M='JFMAMJJASOND';
+  for(let m=0;m<12;m++){const x=18+m*29;s+=`<text x="${x}" y="12" text-anchor="middle" style="fill:var(--fg);font:500 10px var(--f-mono)">${M[m]}</text>`;
+    const dim=new Date(y,m+1,0).getDate();for(let d=1;d<=dim;d++){const dt=new Date(y,m,d),yy=22+d*9.6,k=key(dt);
+      if(cur.done.has(k))s+=`<polygon points="${x},${yy-6} ${x+3.5},${yy+3} ${x-3.5},${yy+3}" style="fill:var(--shard-a)"/><polygon points="${x},${yy-6} ${x+3.5},${yy+3} ${x},${yy+1}" style="fill:var(--shard-b)"/>`;
+      else s+=`<circle cx="${x}" cy="${yy}" r="${dt.getTime()===today.getTime()?2.4:1.1}" style="fill:${dt.getTime()===today.getTime()?'var(--accent)':'color-mix(in srgb,var(--fg) '+(dt>today?'14':'32')+'%,transparent)'}"/>`}}
+  document.getElementById('yearSvg').innerHTML=s;document.getElementById('yearHabit').textContent=cur.name+' · year field';document.getElementById('yearNum').textContent=y;
+}
+
+/* ---------- climb ---------- */
+function renderClimb(){
+  const r=reps(cur);
+  const F=[["20,200 120,110 90,200","#1c262d"],["90,200 120,110 170,200","#042878"],["120,110 200,24 170,200","#1694a4"],["200,24 250,120 170,200","#1c262d"],["170,200 250,120 300,200","#1bb86d"],["250,120 340,200 300,200","#947d18"],["120,110 150,70 200,24","#e07a10"],["200,24 225,70 250,120","#0b1318"]];
+  let s=F.map(([p,c])=>`<polygon points="${p}" fill="${c}"/>`).join('');
+  s+=`<polygon points="200,24 212,44 188,44" fill="#ffffff" opacity=".85"/>`;
+  // switchback path: 60 reps along zigzag from base to peak
+  const W=[[60,192],[250,176],[110,150],[230,128],[140,104],[220,82],[165,62],[205,40],[200,24]];
+  const segs=[];let tot=0;for(let i=1;i<W.length;i++){const l=Math.hypot(W[i][0]-W[i-1][0],W[i][1]-W[i-1][1]);segs.push(l);tot+=l}
+  const at=t=>{let d=t*tot;for(let i=0;i<segs.length;i++){if(d<=segs[i]){const f=d/segs[i];return[W[i][0]+(W[i+1][0]-W[i][0])*f,W[i][1]+(W[i+1][1]-W[i][1])*f]}d-=segs[i]}return W.at(-1)};
+  const path=n=>{let p=[];for(let i=0;i<=n;i++)p.push(at(i/60).map(v=>v.toFixed(1)).join(','));return p.join(' ')};
+  s+=`<polyline points="${path(60)}" fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-width="1.5" stroke-dasharray="2 4"/>`;
+  s+=`<polyline points="${path(r)}" fill="none" style="stroke:var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  CUM.forEach((c,i)=>{const[x,y]=at(c/60);const reached=r>=c;s+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y-11}" stroke="#fff" stroke-opacity="${reached?1:.4}" stroke-width="1.2"/><polygon points="${x},${y-11} ${x+8},${y-8} ${x},${y-5}" style="fill:${reached?'var(--accent)':'#ffffff55'}"/>`});
+  const[mx,my]=at(r/60);s+=`<circle cx="${mx}" cy="${my}" r="6" style="fill:var(--accent)" stroke="#fff" stroke-width="2"/>`;
+  document.getElementById('climbSvg').innerHTML=s;
+  const L=levelOf(r);document.getElementById('climbLbl').textContent=`Level ${L+1} · ${LEVELS[L].n}`;
+  const wk=[...cur.done].filter(k=>new Date(k)>=new Date(today-6*DAY)).length,mo=[...cur.done].filter(k=>k.slice(0,7)===key(today).slice(0,7)).length;
+  document.getElementById('stats').innerHTML=`<div class="stat"><small>This week</small><div class="big">${wk}</div><em>of 7 days</em></div><div class="stat"><small>This month</small><div class="big">${mo}</div><em>reps</em></div><div class="stat"><small>To the gem</small><div class="big">${60-r}</div><em>reps left</em></div>`;
+}
+
+/* ---------- journey diorama (procedural isometric blocks) ---------- */
+function renderJourney(){
+  const r=reps(cur),L=levelOf(r),prev=L?CUM[L-1]:0,inLv=r-prev,need=LEVELS[L].r;
+  document.getElementById('jLevelNo').textContent=`Level ${L+1} of 8 · ${inLv} / ${need} pieces`;
+  document.getElementById('jLevelName').textContent=LEVELS[L].n;document.getElementById('jLevelCopy').textContent=LEVELS[L].c;
+  document.getElementById('levelList').innerHTML=LEVELS.map((l,i)=>`<li class="${i===L?'cur':''}"><span class="mono">${CUM[i]}</span>${l.n}</li>`).join('');
+  const c=document.getElementById('dio'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);
+  const cs=getComputedStyle(document.getElementById('journeyPanel')),A=cs.getPropertyValue('--shard-a').trim(),B=cs.getPropertyValue('--shard-b').trim(),FG=cs.getPropertyValue('--fg').trim();
+  const S=46,ox=360,oy=360,P=(x,y,z)=>[ox+(x-y)*S*.866,oy+(x+y)*S*.5-z*S];
+  // base slab
+  const slab=(x0,y0,x1,y1,z,h,top,l,rr)=>{const q=(pts,f)=>{g.beginPath();pts.forEach((p,i)=>i?g.lineTo(...p):g.moveTo(...p));g.closePath();g.fillStyle=f;g.fill()};
+    q([P(x0,y0,z+h),P(x1,y0,z+h),P(x1,y1,z+h),P(x0,y1,z+h)],top);q([P(x0,y1,z+h),P(x1,y1,z+h),P(x1,y1,z),P(x0,y1,z)],l);q([P(x1,y0,z+h),P(x1,y1,z+h),P(x1,y1,z),P(x1,y0,z)],rr)};
+  slab(-2.6,-2.6,2.6,2.6,-.35,.35,'#2b2b2d','#161617','#0d0d0e');
+  // slots: pyramid of positions, filled bottom-up
+  const slots=[];[[3,0],[2,1],[1,2]].forEach(([n,z])=>{const o=-(n)/2;for(let y=0;y<n;y++)for(let x=0;x<n;x++)slots.push([o+x,o+y,z])});
+  slots.sort((a,b)=>a[2]-b[2]||(a[0]+a[1])-(b[0]+b[1]));
+  const use=slots.slice(0,need);
+  const shade=(hex,k)=>{const n=parseInt(hex.replace('#','').slice(0,6),16);const f=v=>Math.max(0,Math.min(255,Math.round(v*k)));return`rgb(${f(n>>16&255)},${f(n>>8&255)},${f(n&255)})`};
+  use.map((p,i)=>({p,i})).sort((a,b)=>a.p[2]-b.p[2]||(a.p[0]+a.p[1])-(b.p[0]+b.p[1])).forEach(({p:[x,y,z],i})=>{
+    const on=i<inLv,base=on?(i%3===0?B:A):null;
+    if(on)slab(x+.06,y+.06,x+.94,y+.94,z,.9,shade(base,1.08),shade(base,.72),shade(base,.5));
+    else{g.strokeStyle=FG;g.globalAlpha=.18;g.lineWidth=1.5;g.beginPath();[[P(x+.06,y+.06,z+.9),P(x+.94,y+.06,z+.9),P(x+.94,y+.94,z+.9),P(x+.06,y+.94,z+.9),P(x+.06,y+.06,z+.9)],[P(x+.06,y+.94,z+.9),P(x+.06,y+.94,z)],[P(x+.94,y+.94,z+.9),P(x+.94,y+.94,z)],[P(x+.94,y+.06,z+.9),P(x+.94,y+.06,z)],[P(x+.06,y+.94,z),P(x+.94,y+.94,z),P(x+.94,y+.06,z)]].forEach(l=>{l.forEach((pt,j)=>j?g.lineTo(...pt):g.moveTo(...pt))});g.stroke();g.globalAlpha=1}});
+  // floating gem
+  const [gx,gy]=P(0,0,3.6);g.fillStyle=A;g.beginPath();g.moveTo(gx,gy-34);g.lineTo(gx+18,gy);g.lineTo(gx,gy+34);g.closePath();g.fill();g.fillStyle=B;g.beginPath();g.moveTo(gx,gy-34);g.lineTo(gx-18,gy);g.lineTo(gx,gy+34);g.closePath();g.fill();
+}
+
+/* ---------- swatches ---------- */
+function renderSwatches(){document.getElementById('swatches').innerHTML=Object.entries(SKINS).map(([k,s])=>`<div class="sw skin-${k}"><div class="sw-top">${orbHTML({...HABITS[0],done:new Set([key(today)])},74,{label:false})}</div><div class="sw-body"><h3>${s.name}</h3><p>${s.tag}</p><div class="dots">${s.dots.map(c=>`<i style="background:${c}" title="${c}"></i>`).join('')}</div></div></div>`).join('')}
+
+function renderAll(){renderSide();renderStage();renderDesk();renderYear();renderClimb();renderJourney()}
+document.querySelectorAll('.skin-btn').forEach(b=>b.addEventListener('click',()=>{skin=b.dataset.skin;
+  document.querySelectorAll('.skin-btn').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.querySelectorAll('.skinned').forEach(el=>{el.className=el.className.replace(/skin-\w+/,'skin-'+skin)});renderAll()}));
+renderSwatches();renderAll();
+})();
+</script>
