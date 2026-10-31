@@ -6,7 +6,7 @@ Ritual is a home on your Mac for everything you mean to do. Habits you're buildi
 
 *Got a habit app, a to-do app and a pile of sticky notes? Ritual puts them in one place.*
 
-<!-- screenshots coming soon -->
+![Ritual on the Today tab: habits and tasks in the sidebar, the orb in the middle, and the day pane on the right](docs/images/today.png)
 
 ---
 
@@ -15,17 +15,27 @@ Ritual is a home on your Mac for everything you mean to do. Habits you're buildi
 **Your habits build something you can see.**
 Hold the orb to check in, and a piece drops into place on that level's monument. Sixty check-ins take you through eight levels, each with its own shape, and the last one places a gem on top. Days you miss don't take anything away. The count only goes up.
 
+![A monument eleven pieces into its last level, with all eight levels listed](docs/images/journey.png)
+
 **Your to-dos don't slip.**
 Type `Call the bank tomorrow 11:30am #bank !2` and Ritual picks up the day, the time, the label and the priority as you type. Unfinished tasks move up to today and show how late they are. Finished ones stay crossed out until midnight, so you can see what you got done.
+
+![The Tasks tab with a late task, priorities, reminders and labels](docs/images/tasks.png)
 
 **Your whole day in one view.**
 The day pane shows every habit, today's tasks, your groups, the last week, and what's coming up next across habits and tasks. The menu bar shows the same at a glance, and you can tick things off from there.
 
+![All habits: a year of check-ins across every habit, by weekday and by group](docs/images/all-habits.png)
+
 **It notices, kindly.**
 Instead of a streak counter, you see "Showed up 22 of the last 30 days". Stay away for a week and a little dust settles on the orb; one check-in clears it. The journey bar shows where your current pace will take you, and when you'd place the gem.
 
+![Stats for one habit: the year field, the climb, and how often you showed up](docs/images/stats.png)
+
 **It looks like nothing else on your Mac.**
 Six hand-made skins (Carbon, Ember, Paper, Marigold, Aurora, Coral) change the background, the orb's material, the monuments and the accent colour. Every check-in comes with layered sound, motion and light.
+
+![The skin picker showing all six skins](docs/images/skins.png)
 
 **It's yours.**
 No account, no network, no ads, no AI. Everything lives in one JSON file on your Mac, with a backup taken every day.
@@ -35,6 +45,9 @@ No account, no network, no ads, no AI. Everything lives in one JSON file on your
 - **Habit goals:** once a day, a count ("8 glasses"), or an amount ("10 pages"). Journeys can be 30, 60 or 90 reps.
 - **Groups** for your morning, evening or anything else, each with its own progress in the sidebar.
 - **Trophy shelf** for finished journeys and retired habits. Bring any of them back later.
+
+  ![The trophy shelf with finished and archived habits](docs/images/trophy-shelf.png)
+
 - **Reminders** at as many times as you like, per weekday, with Done and Snooze on the banner. Also: quiet hours, and an optional evening "anything left?" check-in.
 - **Tasks:** Today, Inbox for tasks with no day, Upcoming and Done. Labels in your own colours, optional priority, a reminder per task, and drag and drop onto the sidebar.
 - **Keyboard-first:** hold Space to check in, ⌘5 for Tasks, ⌥⌘N for a new task, ⌘Z to undo.
